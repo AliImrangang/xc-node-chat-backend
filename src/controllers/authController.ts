@@ -1,22 +1,10 @@
-import express, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import pool from '../models/db'; // Assuming this is your PostgreSQL connection pool
+import pool from '../models/db'; 
 import jwt from 'jsonwebtoken';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'worisecretkey';
-
-// // Function to generate a random string for tokens or other purposes
-// function generateRandomString(length: number): string {
-//   const characters =
-//     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let result = '';
-//   const charactersLength = characters.length;
-//   for (let i = 0; i < length; i++) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//   }
-//   return result;
-// }
 
 export const register = async (req: Request, res: Response) => {
     const { username, email, password } = req.body;
@@ -28,63 +16,39 @@ export const register = async (req: Request, res: Response) => {
       `
         INSERT INTO users (username, email, password)
         VALUES ($1, $2, $3)
-        RETURNING username, email
-      `,
+        RETURNING *`,
       [username, email, hashedPassword]
     );
-    const user = result.rows(0);
-    res.status(500).json({messages:'User registratered successfully',});
+    const user = result.rows[0];
+    res.status(201).json({messages:'User registratered successfully',user});
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: 'Failed to register user' });
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-  // try {
-  //   // 1. Get email and password from the request body
-  //   const { email, password } = req.body;
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
 
-  //   // 2. Check if the user exists in the database
-  //   const result = await pool.query(
-  //     `
-  //       SELECT * FROM users WHERE email = $1
-  //     `,
-  //     [email]
-  //   );
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
 
-  //   if (result.rows.length === 0) {
-  //     return res.status(401).json({ message: 'Invalid credentials' });
-  //   }
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
 
-  //   const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(400).json({ error: 'Invalid credentials' });
+      return;
+    }
 
-  //   // 3. Compare the provided password with the hashed password in the database
-  //   const isMatch = await bcrypt.compare(password, user.password);
-
-  //   if (!isMatch) {
-  //     return res.status(401).json({ message: 'Invalid credentials' });
-  //   }
-
-  //   // 4. Generate a JWT token
-  //   const token = jwt.sign(
-  //     { userId: user.id, email: user.email },
-  //     JWT_SECRET,
-  //     { expiresIn: '1h' }
-  //   );
-
-  //   // 5. Send the token as a response
-  //   res.json({
-  //     message: 'Login successful',
-  //     token,
-  //     user: {
-  //       id: user.id,
-  //       username: user.username,
-  //       email: user.email,
-  //     },
-  //   });
-  // } catch (error) {
-  //   console.error('Error during login:', error);
-  //   res.status(500).json({ message: 'Internal Server Error' });
-  // }
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '10h' });
+    res.json({ message: 'Logged in successfully', token });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Failed to log in' });
+  }
 };
