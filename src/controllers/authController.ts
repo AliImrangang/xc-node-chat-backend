@@ -46,9 +46,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '10h' });
-    res.json({ message: 'Logged in successfully', token });
+  
+    let finalResult = {...user,token}
+    res.json({ user: finalResult });
   } catch (error) {
-    console.error('Error during login:', error);
     res.status(500).json({ message: 'Failed to log in' });
   }
 };
