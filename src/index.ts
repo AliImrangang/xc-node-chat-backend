@@ -40,6 +40,13 @@ const savedMessage = await saveMessage(conversationId,senderId,content);
 console.log("sendMessage:");
 console.log(savedMessage);
 io.to(conversationId).emit('newmessage',saveMessage);
+
+
+io.emit('conversationUpdated',{
+  conversationId,
+  lastMessage:savedMessage.content,
+  lastMessageTime: savedMessage.created_at,
+});
   }catch(err){
     console.error('Failed to save message:',err);
   }
