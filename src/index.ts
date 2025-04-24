@@ -4,6 +4,8 @@ import authRoutes from './routes/authRoutes';
 import pool from './models/db'; // <-- Make sure this is imported to access the database
 import conversationsRoutes from './routes/conversationRoutes';
 import messagesRoutes from './routes/messagesRoutes'
+import contactsRoutes from './routes/contactsRoutes'
+
 import http from 'http';
 import { Server } from "socket.io";
 import { saveMessage } from './controllers/messagesController';
@@ -22,8 +24,9 @@ const io = new Server(server,{
 
 // Register auth routes
 app.use('/auth', authRoutes);
-app.use('/conversation',conversationsRoutes);
-app.use('/messages',messagesRoutes)
+app.use('/conversation', conversationsRoutes);
+app.use('/messages', messagesRoutes);
+app.use('/contacts', contactsRoutes);
 
 io.on('connection',(socket)=>{
   console.log ('A user connected:',socket.id); 
