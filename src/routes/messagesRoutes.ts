@@ -4,6 +4,6 @@ import { fetchAllMessagesByConversationId } from "../controllers/messagesControl
 
 const router = Router();
 
-router.get("/conversations/:conversationId", verifyToken, fetchAllMessagesByConversationId);
+router.get('/:conversationId', verifyToken, fetchAllMessagesByConversationId);
 
 export default router;

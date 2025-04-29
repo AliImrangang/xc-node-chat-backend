@@ -5,8 +5,9 @@ import { fetchAllConversationsByUserId } from '../controllers/conversationsContr
 const router = Router(); 
 
 router.get('/', verifyToken, fetchAllConversationsByUserId);
+router.post('/check-or-create', verifyToken, fetchAllConversationsByUserId);
 
 
 export default router;
 
-
+                    

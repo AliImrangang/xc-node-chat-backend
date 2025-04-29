@@ -7,7 +7,7 @@ export const fetchAllMessagesByConversationId = async (req: Request, res: Respon
     try {
         const result = await pool.query(
             `
-            SELECT m.id, m.sender_id, m.conversation_id, m.created_at
+            SELECT m.id,m.content, m.sender_id, m.conversation_id, m.created_at
             FROM messages m
             WHERE m.conversation_id = $1
             ORDER BY m.created_at ASC;
@@ -23,16 +23,16 @@ export const fetchAllMessagesByConversationId = async (req: Request, res: Respon
 };
 
 
-export const saveMessage = async (conversationId:string,senderId: string,content:string) =>{
+export const saveMessage = async (conversationId: string, senderId: string, content: string) =>{
     try{
         const result = await pool.query(
-            `
-            INSERT INTO messages (conversation_id,sender_Id,content)
-            Values ($1,$2,$3)
-            Returning = ;
-
+            ` 
+            INSERT INTO messages (conversation_id, sender_Id, content)
+            Values ($1, $2, $3)
+            Returning id, content, sender_id, conversation_id, created_at;
+ 
             `,
-            [conversationId,senderId,content]
+            [conversationId, senderId, content]
     
         );
 

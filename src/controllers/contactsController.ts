@@ -10,9 +10,9 @@ export const fetchContacts = async(req:Request,res: Response): Promise<any> =>{
     try {
         const result = await pool.query(
             `
-          SELECT c.uid AS contact_id, u.username, u.email
+          SELECT u.id AS contact_id, u.username, u.email
           FROM Contacts c
-          JOIN Users u ON u.uid = c.contact_id
+          JOIN Users u ON u.id = c.contact_id
           WHERE c.user_id = $1
           ORDER BY u.username ASC;
         `, 
