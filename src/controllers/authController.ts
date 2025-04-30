@@ -5,19 +5,23 @@ import jwt from 'jsonwebtoken';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'worisecretkey';
+const randomImages = [
+  'https://example.com/image1.jpg '
+]
 
 export const register = async (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     try {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const randomImage = randomImages[Math.floor(Math.random()*randomImages.length)];
 
     // 3. Insert the user into the database
     const result = await pool.query(
       `
-        INSERT INTO users (username, email, password)
-        VALUES ($1, $2, $3)
+        INSERT INTO users (username, email, password,profile_images)
+        VALUES ($1, $2, $3, $4)
         RETURNING *`,
-      [username, email, hashedPassword]
+      [username, email, hashedPassword,randomImages]
     );
     const user = result.rows[0];
     res.status(201).json({messages:'User registratered successfully',user});

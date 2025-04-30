@@ -15,6 +15,11 @@ if (req.user) {
             WHEN u1.id = $1 THEN u2.username
             ELSE u1.username
          END AS participant_name,
+         CASE 
+            When u1.id = $1 THEN u2.proofile_image
+            ELSE u1.profile_image
+         END AS participant_image
+        
           m.content AS last_message,
           m.created_at AS last_message_time
         FROM conversations c
@@ -83,4 +88,29 @@ if (req.user) {
     }
     
 
+}
+
+export const generateDailyQuestion = async (req: Request, res: Response): Promise<any> => {
+  const conversationId=req.params.id;
+
+  try{
+    const result = await pool.query(
+      `
+      SELECT content from messages
+      WHERE conversation_id = $1 AND sender_id = 'AI-BOT'
+      ORDER BY created_at DESc
+      LIMIT 1
+
+    `,
+    [conversationId]
+    );
+      if (result.rowCount ==0) {
+        return res.status(404).json({error:'No daily question found'})
+      }
+      res.json({question: result.rows[0].content});  
+  }
+  catch(error){
+    console.error('Error generating daily question:', error);
+    return res.status(500).json({ error: 'Failed to generate daily question' });
+  }
 }

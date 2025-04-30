@@ -16,7 +16,9 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
     "nodemon": "3.1.9",
+    "openai": "^4.96.0",
     "pg": "^8.14.1",
     "socket.io": "^4.8.1"
   },
@@ -25,6 +27,7 @@
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.11.13",
     "@types/socket.io": "^3.0.1",
     "nodemon": "^3.1.9",

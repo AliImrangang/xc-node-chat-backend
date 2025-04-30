@@ -10,13 +10,13 @@ export const fetchContacts = async(req:Request,res: Response): Promise<any> =>{
     try {
         const result = await pool.query(
             `
-          SELECT u.id AS contact_id, u.username, u.email
+          SELECT u.id AS contact_id, u.username, u.email,u.profile_image
           FROM Contacts c
           JOIN Users u ON u.id = c.contact_id
           WHERE c.user_id = $1
           ORDER BY u.username ASC;
         `, 
-        [userId]); 
+        [userId]);                                       
     
         return res.json(result.rows);
     } catch (error) {
@@ -58,3 +58,27 @@ export const addContact = async (req: Request,res: Response):Promise<any> =>{
           
     };
 
+export const recentContacts = async (req: Request,res: Response):Promise<any> =>{
+  let userId = null;
+  if(req.user){
+      userId = req.user.id;
+  }
+  try{
+      const result= await pool.query(
+      `
+      SELECT u.id AS contact_id,u.username,u.email,u.profile_image
+      FROM contacts c
+      JOIN users u ON u.id = c.contact_id
+      WHERE c.user_id = $1
+      ORDER BY c.created_at DESC
+      LIMIT 8
+      `,
+      [userId]
+    );                    
+         res.status(201).json({message:'contacts added successfully'});
+      }catch(error){
+          console.error('Error fetching recent contact : ',error);
+           res.status(500).json({error:'Failed to fetch recent contacts'});
+      }
+        
+  };
